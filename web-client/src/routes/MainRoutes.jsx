@@ -3,10 +3,9 @@
 import MainLayout from "@/layouts/main/MainLayout";
 import Dashboard from "@/pages/dashboard";
 import NewsMain from "@/pages/news";
-import ScenariosMain from "@/pages/scenarios";
 import RecruitMain from "@/pages/recruit";
-import ExploreNews from "@/pages/news/ExploreNews";
 import NewRecruit from "@/pages/recruit/NewRecruit";
+import ExploreRecruit from "@/pages/recruit/ExploreRecruit";
 
 const MainRoutes = {
   path: "/",
@@ -29,8 +28,8 @@ const MainRoutes = {
       element: <RecruitMain />,
     },
     {
-      path: "explore/:id",
-      element: <ExploreNews />,
+      path: "recruit/:id",
+      element: <ExploreRecruit />,
     },
   ],
 };

@@ -22,6 +22,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import {
+  Share2,
   Search,
   Filter,
   Heart,
@@ -52,7 +53,7 @@ const volunteerOpportunities = [
     id: 2,
     title: "Emergency Shelter Support",
     type: "Crisis Response",
-    skills: ["Organizing", "Compassionate Care", "Teamwork"],
+    skills: ["Organizing", "Teamwork"],
     description:
       "Assist with setting up and managing emergency shelters for displaced individuals after a crisis. Volunteers will organize resources, provide compassionate care, and assist with registration and housing coordination.",
     participantCount: 30,
@@ -67,7 +68,7 @@ const volunteerOpportunities = [
     id: 3,
     title: "Disease Outbreak Response Team",
     type: "Public Health",
-    skills: ["Public Health", "Sanitation", "Medical Assistance"],
+    skills: ["Public Health", "Sanitation"],
     description:
       "Join our public health response team to provide support during a disease outbreak. Volunteers will assist with sanitation efforts, distribute medical supplies, and provide basic health care to affected individuals.",
     participantCount: 20,
@@ -127,7 +128,7 @@ const RecruitMain = () => {
     >
       <div className="flex flex-col sm:flex-row justify-between items-center">
         <h1 className="text-3xl font-bold">Recruit</h1>
-        <Button>
+        <Button onClick={() => navigate(`/recruit/create`)}>
           New opportunity
           <Plus className="ml-2 h-4 w-4" />
         </Button>
@@ -210,7 +211,6 @@ const RecruitMain = () => {
                         className="px-2 py-1 text-sm font-medium"
                       >
                         <div className="flex items-center space-x-1">
-                          {getOpportunityIcon(opportunity.type)}
                           <span>{opportunity.type}</span>
                         </div>
                       </Badge>
@@ -263,12 +263,16 @@ const RecruitMain = () => {
                       ))}
                     </div>
                   </CardContent>
-                  <CardFooter>
+                  <CardFooter className="flex justify-between items-center">
                     <Button
-                      className="w-full"
-                      onClick={() => navigate(`/volunteer/${opportunity.id}`)}
+                      className="flex-grow mr-2"
+                      onClick={() => navigate(`/recruit/1`)}
                     >
                       Learn more
+                    </Button>
+                    <Button size="icon" variant="outline" className="w-9 h-9">
+                      <Share2 className="h-4 w-4" />
+                      <span className="sr-only">Share</span>
                     </Button>
                   </CardFooter>
                 </Card>
