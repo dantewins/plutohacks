@@ -21,10 +21,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useClerk } from "@clerk/clerk-react";
 import {
-  LineChart,
+  Eclipse,
   Search,
   Home,
-  Package2,
   Newspaper,
   UsersRound,
   Gift,
@@ -37,7 +36,6 @@ const tabs = [
   { name: "news", icon: <Newspaper className="h-4 w-4" /> },
   { name: "volunteer", icon: <UsersRound className="h-4 w-4" /> },
   { name: "donation", icon: <Gift className="h-4 w-4" /> },
-  { name: "analytics", icon: <LineChart className="h-4 w-4" /> },
 ];
 
 const MainHeader = () => {
@@ -66,8 +64,8 @@ const MainHeader = () => {
           <SheetContent side="left" className="flex flex-col">
             <nav className="grid gap-2 text-lg font-medium">
               <Link to="/" className="flex items-center gap-2 font-semibold">
-                <Package2 className="h-6 w-6" />
-                <span className="sr-only">Acme Inc</span>
+                <Eclipse className="h-6 w-6" />
+                <span className="sr-only">SavePluto</span>
               </Link>
               {tabs.map((tab, i) => (
                 <Link
@@ -84,22 +82,6 @@ const MainHeader = () => {
                 </Link>
               ))}
             </nav>
-            <div className="mt-auto">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Upgrade to Pro</CardTitle>
-                  <CardDescription>
-                    Unlock all features and get unlimited access to our support
-                    team.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button size="sm" className="w-full">
-                    Upgrade
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
           </SheetContent>
         </Sheet>
 

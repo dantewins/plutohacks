@@ -46,6 +46,7 @@ const fetchActiveJobs = asyncHandler(async (req, res) => {
     // Find jobs where the userId exists in the joinedUsers array
     const jobs = await Jobs.find({
       joinedUsers: { $in: [userId] },
+      category: "volunteer",
     });
 
     if (jobs.length > 0) {
