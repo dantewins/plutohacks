@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { axiosPrivate as axios } from "@/api/axios";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -34,19 +34,16 @@ import {
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   type: z.string().min(1, "Type is required"),
-  skills: z.string().min(1, "Skills are required"), // Updated: Skills are now required
   description: z.string().min(1, "Description is required"),
-  participantCount: z
-    .number()
-    .positive("Must be a positive number")
-    .or(z.string().min(1, "Participant count is required")),
   duration: z.string().min(1, "Duration is required"),
   startDate: z.string().min(1, "Start date is required"),
-  responsibilities: z.string().min(1, "Responsibilities are required"),
-  location: z.string().min(1, "Location is required"),
+  goal: z
+    .number()
+    .positive("Goal must be a positive number")
+    .min(1, "Goal is required"),
 });
 
-export default function NewJob() {
+export default function NewRequest() {
   const navigate = useNavigate();
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
@@ -55,18 +52,15 @@ export default function NewJob() {
   const initialValues = {
     title: "",
     type: "",
-    skills: "",
     description: "",
-    participantCount: "",
     duration: "",
     startDate: new Date().toISOString().split("T")[0],
-    responsibilities: "",
-    location: "",
+    goal: 0, // New goal field initialized to 0
   };
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const response = await axios.post("/jobs/volunteer", values);
+      const response = await axios.post("/jobs/donation", values);
       console.log("Form submitted successfully:", response.data);
       setIsSuccessModalOpen(true);
       setSubmitting(false);
@@ -89,8 +83,8 @@ export default function NewJob() {
       className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 mt-2"
     >
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Volunteer</h1>
-        <Button variant="outline" onClick={() => navigate("/volunteer")}>
+        <h1 className="text-3xl font-bold">Donation Request</h1>
+        <Button variant="outline" onClick={() => navigate("/donation")}>
           Cancel
         </Button>
       </div>
@@ -103,7 +97,7 @@ export default function NewJob() {
           {({ errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
               <CardHeader>
-                <CardTitle>Volunteer Details</CardTitle>
+                <CardTitle>Fundraiser Request Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Title Field */}
@@ -128,20 +122,16 @@ export default function NewJob() {
                         {...field}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select opportunity type" />
+                          <SelectValue placeholder="Select request type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Natural Disaster">
-                            Natural Disaster
-                          </SelectItem>
-                          <SelectItem value="Crisis Response">
-                            Crisis Response
-                          </SelectItem>
-                          <SelectItem value="Public Health">
-                            Public Health
+                          <SelectItem value="Education">Education</SelectItem>
+                          <SelectItem value="Healthcare">Healthcare</SelectItem>
+                          <SelectItem value="Disaster Response">
+                            Disaster Relief
                           </SelectItem>
                           <SelectItem value="Community Safety">
-                            Community Safety
+                            International aid
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -149,21 +139,6 @@ export default function NewJob() {
                   </Field>
                   {errors.type && touched.type && (
                     <div className="text-red-500">{errors.type}</div>
-                  )}
-                </div>
-                {/* Skills Field */}
-                <div className="space-y-2">
-                  <label htmlFor="skills" className="text-sm font-medium">
-                    Required Skills (comma-separated)
-                  </label>
-                  <Field
-                    as={Input}
-                    id="skills"
-                    name="skills"
-                    placeholder="e.g. First Aid, Debris Removal, Water Safety"
-                  />
-                  {errors.skills && touched.skills && (
-                    <div className="text-red-500">{errors.skills}</div>
                   )}
                 </div>
                 {/* Description Field */}
@@ -181,41 +156,20 @@ export default function NewJob() {
                     <div className="text-red-500">{errors.description}</div>
                   )}
                 </div>
-                {/* Participant Count and Duration Fields */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="participantCount"
-                      className="text-sm font-medium"
-                    >
-                      Number of Participants
-                    </label>
-                    <Field
-                      as={Input}
-                      id="participantCount"
-                      name="participantCount"
-                      type="number"
-                    />
-                    {errors.participantCount && touched.participantCount && (
-                      <div className="text-red-500">
-                        {errors.participantCount}
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="duration" className="text-sm font-medium">
-                      Duration
-                    </label>
-                    <Field
-                      as={Input}
-                      id="duration"
-                      name="duration"
-                      placeholder="e.g. 2 weeks, 3 months, Ongoing"
-                    />
-                    {errors.duration && touched.duration && (
-                      <div className="text-red-500">{errors.duration}</div>
-                    )}
-                  </div>
+                {/* Duration Field */}
+                <div className="space-y-2">
+                  <label htmlFor="duration" className="text-sm font-medium">
+                    Duration
+                  </label>
+                  <Field
+                    as={Input}
+                    id="duration"
+                    name="duration"
+                    placeholder="e.g. 2 weeks, 3 months, Ongoing"
+                  />
+                  {errors.duration && touched.duration && (
+                    <div className="text-red-500">{errors.duration}</div>
+                  )}
                 </div>
                 {/* Start Date Field */}
                 <div className="space-y-2">
@@ -232,35 +186,20 @@ export default function NewJob() {
                     <div className="text-red-500">{errors.startDate}</div>
                   )}
                 </div>
-                {/* Location Field */}
+                {/* Goal Field */}
                 <div className="space-y-2">
-                  <label htmlFor="location" className="text-sm font-medium">
-                    Location
-                  </label>
-                  <Field as={Input} id="location" name="location" />
-                  {errors.location && touched.location && (
-                    <div className="text-red-500">{errors.location}</div>
-                  )}
-                </div>
-                {/* Responsibilities Field */}
-                <div className="space-y-2">
-                  <label
-                    htmlFor="responsibilities"
-                    className="text-sm font-medium"
-                  >
-                    Responsibilities (comma-separated)
+                  <label htmlFor="goal" className="text-sm font-medium">
+                    Goal (Monetary Amount)
                   </label>
                   <Field
-                    as={Textarea}
-                    id="responsibilities"
-                    name="responsibilities"
-                    placeholder="e.g. Set up equipment, Coordinate volunteers"
-                    rows={3}
+                    as={Input}
+                    id="goal"
+                    name="goal"
+                    type="number"
+                    placeholder="Enter goal amount"
                   />
-                  {errors.responsibilities && touched.responsibilities && (
-                    <div className="text-red-500">
-                      {errors.responsibilities}
-                    </div>
+                  {errors.goal && touched.goal && (
+                    <div className="text-red-500">{errors.goal}</div>
                   )}
                 </div>
               </CardContent>
@@ -270,7 +209,7 @@ export default function NewJob() {
                   className="w-full"
                   disabled={isSubmitting}
                 >
-                  Create opportunity
+                  Create request
                 </Button>
               </CardFooter>
             </Form>
@@ -284,13 +223,13 @@ export default function NewJob() {
           <DialogHeader>
             <DialogTitle>Success</DialogTitle>
             <DialogDescription>
-              Your volunteer opportunity has been successfully created.
+              Your donation request has been successfully created.
             </DialogDescription>
           </DialogHeader>
           <Button
             onClick={() => {
               setIsSuccessModalOpen(false);
-              navigate("/volunteer");
+              navigate("/donation");
             }}
           >
             OK

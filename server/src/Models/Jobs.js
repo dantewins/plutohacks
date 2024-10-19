@@ -35,7 +35,12 @@ module.exports = model(
       type: String,
       required: true,
     },
+    goal: Number,
     location: String,
+    currentAmount: {
+      type: Number,
+      default: 0,
+    },
     organizer: {}, // You might want to specify organizer details as well, such as a user reference
     createdAt: {
       type: Date,

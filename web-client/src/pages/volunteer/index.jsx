@@ -83,10 +83,13 @@ const VolunteerMain = () => {
       transition={{ duration: 0.5 }}
       className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 mt-2"
     >
-      <div className="flex flex-col sm:flex-row justify-between items-center">
-        <h1 className="text-3xl font-bold">Volunteer</h1>
-        <Button onClick={() => navigate(`/volunteer/create`)}>
-          New job
+      <div className="flex items-center justify-between flex-wrap">
+        <h1 className="text-2xl sm:text-3xl font-bold order-1">Volunteer</h1>
+        <Button
+          className="order-2 flex items-center text-sm sm:text-base"
+          onClick={() => navigate(`/volunteer/create`)}
+        >
+          <span>New job</span>
           <Plus className="ml-2 h-4 w-4" />
         </Button>
       </div>
@@ -144,10 +147,11 @@ const VolunteerMain = () => {
           </motion.div>
         ) : (
           <motion.div
-            key="results"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            key={currentPage} // Use currentPage as the key to trigger animation on page change
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
             className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
           >
             {currentJobs.map((job) => (
@@ -246,6 +250,7 @@ const VolunteerMain = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
       {filteredJobs.length > jobsPerPage && (
         <div className="flex justify-center items-center mt-8">
           <Button

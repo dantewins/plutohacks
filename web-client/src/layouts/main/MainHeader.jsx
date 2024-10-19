@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
@@ -21,18 +21,33 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useClerk } from "@clerk/clerk-react";
 import {
-  Telescope,
-  Home,
   LineChart,
-  Menu,
-  Settings,
-  Package2,
   Search,
-  MessageSquare,
+  Home,
+  Package2,
+  Newspaper,
+  UsersRound,
+  Gift,
+  Menu,
 } from "lucide-react";
+import { useState, useEffect } from "react";
+
+const tabs = [
+  { name: "dashboard", icon: <Home className="h-4 w-4" /> },
+  { name: "news", icon: <Newspaper className="h-4 w-4" /> },
+  { name: "volunteer", icon: <UsersRound className="h-4 w-4" /> },
+  { name: "donation", icon: <Gift className="h-4 w-4" /> },
+  { name: "analytics", icon: <LineChart className="h-4 w-4" /> },
+];
 
 const MainHeader = () => {
   const { signOut } = useClerk();
+  const location = useLocation();
+  const [highlighted, setHighlighted] = useState("");
+
+  useEffect(() => {
+    setHighlighted(location.pathname.split("/")[1]);
+  }, [location]);
 
   return (
     <>
@@ -50,51 +65,24 @@ const MainHeader = () => {
           </SheetTrigger>
           <SheetContent side="left" className="flex flex-col">
             <nav className="grid gap-2 text-lg font-medium">
-              <Link
-                to="#"
-                className="flex items-center gap-2 text-lg font-semibold"
-              >
+              <Link to="/" className="flex items-center gap-2 font-semibold">
                 <Package2 className="h-6 w-6" />
                 <span className="sr-only">Acme Inc</span>
               </Link>
-              <Link
-                to="#"
-                className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-              >
-                <Home className="h-5 w-5" />
-                Dashboard
-              </Link>
-              <Link
-                to="#"
-                className="mx-[-0.65rem] flex items-center gap-4 rounded-xl bg-muted px-3 py-2 text-foreground hover:text-foreground"
-              >
-                <Telescope className="h-5 w-5" />
-                Explore
-                <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                  6
-                </Badge>
-              </Link>
-              <Link
-                to="#"
-                className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-              >
-                <MessageSquare className="h-5 w-5" />
-                Messages
-              </Link>
-              <Link
-                to="#"
-                className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-              >
-                <Settings className="h-5 w-5" />
-                Settings
-              </Link>
-              <Link
-                to="#"
-                className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-              >
-                <LineChart className="h-5 w-5" />
-                Analytics
-              </Link>
+              {tabs.map((tab, i) => (
+                <Link
+                  key={i}
+                  to={"/" + tab.name}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
+                    highlighted === tab.name
+                      ? "bg-muted text-primary"
+                      : "text-muted-foreground hover:text-primary"
+                  }`}
+                >
+                  {tab.icon}
+                  {tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}
+                </Link>
+              ))}
             </nav>
             <div className="mt-auto">
               <Card>
@@ -114,6 +102,7 @@ const MainHeader = () => {
             </div>
           </SheetContent>
         </Sheet>
+
         <div className="w-full flex-1">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -124,6 +113,7 @@ const MainHeader = () => {
             />
           </div>
         </div>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="icon" className="rounded-full">
@@ -141,8 +131,7 @@ const MainHeader = () => {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => signOut({ redirectUrl: "/" })}>
               Logout
-            </DropdownMenuItem>{" "}
-            {/* Logout using signOut */}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </header>

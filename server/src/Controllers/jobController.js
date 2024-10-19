@@ -38,6 +38,30 @@ const fetchJob = asyncHandler(async (req, res) => {
   }
 });
 
+// Fetch all active jobs under a user
+const fetchActiveJobs = asyncHandler(async (req, res) => {
+  const { userId } = req.auth; // Assuming you have userId in req.auth from your auth middleware
+
+  try {
+    // Find jobs where the userId exists in the joinedUsers array
+    const jobs = await Jobs.find({
+      joinedUsers: { $in: [userId] },
+    });
+
+    if (jobs.length > 0) {
+      res.status(200).json(jobs);
+    } else {
+      res
+        .status(404)
+        .json({ message: `No active jobs found for user ${userId}` });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching jobs", error: error.message });
+  }
+});
+
 // Add a new volunteer job
 const addVolunteerJob = asyncHandler(async (req, res) => {
   const {
@@ -83,6 +107,39 @@ const addVolunteerJob = asyncHandler(async (req, res) => {
   });
 
   // Save to the database
+  const savedJob = await newJob.save();
+
+  if (savedJob) {
+    res.status(201).json(savedJob);
+  } else {
+    res.status(400);
+    throw new Error("Invalid job data");
+  }
+});
+
+// Add a new donation job
+const addDonationJob = asyncHandler(async (req, res) => {
+  const { title, type, description, duration, startDate, goal } = req.body;
+  const { userId } = req.auth;
+
+  const organizer = await clerkClient.users.getUser(userId);
+
+  const newJob = new Jobs({
+    organizer: {
+      id: organizer.id,
+      email: organizer.emailAddresses[0].emailAddress,
+      name: `${organizer.firstName} ${organizer.lastName}`,
+    },
+    title,
+    description,
+    type,
+    duration,
+    startDate,
+    goal,
+    joinedUsers: [organizer.id],
+    category: "donation",
+  });
+
   const savedJob = await newJob.save();
 
   if (savedJob) {
@@ -165,10 +222,67 @@ const leaveVolunteer = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Successfully left the job", job });
 });
 
+// Donate to a specific fundraiser
+const donate = asyncHandler(async (req, res) => {
+  const { _id, amount } = req.body;
+
+  // fetch user ID from Clerk
+  const userId = req.auth.userId;
+
+  // find the job by ID
+  const job = await Jobs.findOne({ _id });
+
+  // validate job existence
+  if (!job) {
+    return res.status(404).json({ message: `No job with ID: ${_id} found` });
+  }
+
+  // validate job category
+  if (job.category !== "donation") {
+    return res.status(400).json({ message: "This is not a donation job." });
+  }
+
+  // validate donation amount
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ message: "Invalid donation amount." });
+  }
+
+  // fetch user details
+  const donor = await clerkClient.users.getUser(userId);
+
+  // current amount validation and update
+  job.currentAmount = (job.currentAmount || 0) + amount;
+
+  // check if user donates
+  if (!job.joinedUsers.some((d) => d.userId === userId)) {
+    // if not, push them to array
+    job.joinedUsers.push({
+      userId: donor.id,
+      name: `${donor.firstName} ${donor.lastName}`,
+      email: donor.emailAddresses[0].emailAddress,
+      amount,
+      date: new Date(),
+    });
+  } else {
+    // update amount if already donated
+    const donorIndex = job.joinedUsers.findIndex((d) => d.userId === userId);
+    job.joinedUsers[donorIndex].amount += amount;
+  }
+
+  // save updated job
+  const updatedJob = await job.save();
+
+  // respond with data
+  res.status(200).json({ message: "Donation successful", job: updatedJob });
+});
+
 module.exports = {
   fetchSpecificJobs,
+  fetchActiveJobs,
   fetchJob,
   addVolunteerJob,
+  addDonationJob,
   joinVolunteer,
   leaveVolunteer,
+  donate,
 };

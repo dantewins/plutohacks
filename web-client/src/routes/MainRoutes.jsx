@@ -6,6 +6,7 @@ import VolunteerMain from "@/pages/volunteer";
 import NewJob from "@/pages/volunteer/NewJob";
 import ExploreJob from "@/pages/volunteer/ExploreJob";
 import DonationMain from "@/pages/donation";
+import NewRequest from "@/pages/donation/NewRequest";
 
 const MainRoutes = {
   path: "/",
@@ -38,6 +39,10 @@ const MainRoutes = {
     {
       path: "donation",
       element: <DonationMain />,
+    },
+    {
+      path: "donation/create",
+      element: <NewRequest />,
     },
   ],
 };

@@ -18,6 +18,7 @@ const errorHandler = require("./Middleware/errorHandler");
 const sanitize = require("./Middleware/sanitize");
 
 const jobRoutes = require("./Routes/jobRoutes");
+const newsRoutes = require("./Routes/newsRoutes");
 
 require("dotenv").config();
 
@@ -46,6 +47,7 @@ app.use(cookieParser()); // Make sure cookie-parser is used before auth middlewa
 app.use(clerkMiddleware({ clerkClient }));
 
 app.use("/v1/jobs", jobRoutes);
+app.use("/v1/news", newsRoutes);
 
 app.use(errorHandler);
 

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,7 +14,6 @@ import {
   Bell,
   LineChart,
   Home,
-  Settings,
   Package2,
   Newspaper,
   UsersRound,
@@ -28,7 +26,6 @@ const tabs = [
   { name: "volunteer", icon: <UsersRound className="h-4 w-4" /> },
   { name: "donation", icon: <Gift className="h-4 w-4" /> },
   { name: "analytics", icon: <LineChart className="h-4 w-4" /> },
-  { name: "settings", icon: <Settings className="h-4 w-4" /> },
 ];
 
 const MainSidebar = () => {
@@ -66,11 +63,6 @@ const MainSidebar = () => {
               >
                 {tab.icon}
                 {tab.name.charAt(0).toUpperCase() + tab.name.slice(1)}
-                {tab.name === "explore" && (
-                  <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                    6
-                  </Badge>
-                )}
               </Link>
             ))}
           </nav>
