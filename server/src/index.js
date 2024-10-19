@@ -3,9 +3,12 @@ const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const mongoSanitize = require("express-mongo-sanitize");
 const cors = require("cors");
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
 const hpp = require("hpp");
+const {
+  createClerkClient,
+  clerkMiddleware,
+  requireAuth,
+} = require("@clerk/express"); // Import auth middleware from @clerk/express
 
 const corsOptions = require("./Configs/corsOptions");
 const connectDB = require("./Configs/dbConn");
@@ -14,17 +17,20 @@ const { logger, logEvents } = require("./Middleware/logger");
 const errorHandler = require("./Middleware/errorHandler");
 const sanitize = require("./Middleware/sanitize");
 
-const recruitRoutes = require("./Routes/admin/recruitRoutes");
-const authRoutes = require("./Routes/authRoutes");
+const jobRoutes = require("./Routes/jobRoutes");
 
 require("dotenv").config();
 
 const app = express();
 const PORT = 3001;
 
+const clerkClient = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY,
+  publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+});
+
 connectDB();
 
-app.set("trust proxy", 1);
 app.use(logger);
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -36,30 +42,10 @@ app.use(
 app.use(mongoSanitize());
 app.use(sanitize);
 app.use(hpp());
-app.use(cookieParser());
-app.use(
-  session({
-    secret: process.env.TOKEN_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      maxAge: 1000 * 60 * 60 * 24 * 7,
-      sameSite: "lax",
-      secure: "auto",
-    },
-    store: MongoStore.create({
-      client: mongoose.connection.getClient(),
-      collectionName: "sessions",
-      stringify: false,
-      autoRemove: "interval",
-      autoRemoveInterval: 1,
-    }),
-  }),
-);
+app.use(cookieParser()); // Make sure cookie-parser is used before auth middleware
+app.use(clerkMiddleware({ clerkClient }));
 
-app.use("/v1/auth", authRoutes);
-app.use("/v1/technician", technicianRoutes);
+app.use("/v1/jobs", jobRoutes);
 
 app.use(errorHandler);
 

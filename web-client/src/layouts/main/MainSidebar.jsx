@@ -19,12 +19,14 @@ import {
   Package2,
   Newspaper,
   UsersRound,
+  Gift,
 } from "lucide-react";
 
 const tabs = [
   { name: "dashboard", icon: <Home className="h-4 w-4" /> },
   { name: "news", icon: <Newspaper className="h-4 w-4" /> },
-  { name: "recruit", icon: <UsersRound className="h-4 w-4" /> },
+  { name: "volunteer", icon: <UsersRound className="h-4 w-4" /> },
+  { name: "donation", icon: <Gift className="h-4 w-4" /> },
   { name: "analytics", icon: <LineChart className="h-4 w-4" /> },
   { name: "settings", icon: <Settings className="h-4 w-4" /> },
 ];

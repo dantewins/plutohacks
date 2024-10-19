@@ -1,15 +1,19 @@
-// import Loadable from 'ui-component/loaders/Loadable';
-
+import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "@/layouts/main/MainLayout";
 import Dashboard from "@/pages/dashboard";
 import NewsMain from "@/pages/news";
-import RecruitMain from "@/pages/recruit";
-import NewRecruit from "@/pages/recruit/NewRecruit";
-import ExploreRecruit from "@/pages/recruit/ExploreRecruit";
+import VolunteerMain from "@/pages/volunteer";
+import NewJob from "@/pages/volunteer/NewJob";
+import ExploreJob from "@/pages/volunteer/ExploreJob";
+import DonationMain from "@/pages/donation";
 
 const MainRoutes = {
   path: "/",
-  element: <MainLayout />,
+  element: (
+    <ProtectedRoute>
+      <MainLayout />
+    </ProtectedRoute>
+  ),
   children: [
     {
       path: "dashboard",
@@ -20,16 +24,20 @@ const MainRoutes = {
       element: <NewsMain />,
     },
     {
-      path: "recruit/create",
-      element: <NewRecruit />,
+      path: "volunteer/create",
+      element: <NewJob />,
     },
     {
-      path: "recruit",
-      element: <RecruitMain />,
+      path: "volunteer",
+      element: <VolunteerMain />,
     },
     {
-      path: "recruit/:id",
-      element: <ExploreRecruit />,
+      path: "volunteer/:id",
+      element: <ExploreJob />,
+    },
+    {
+      path: "donation",
+      element: <DonationMain />,
     },
   ],
 };

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState } from "react";
+import { axiosPrivate as axios } from "@/api/axios";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Formik, Form, Field } from "formik";
@@ -22,23 +23,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   type: z.string().min(1, "Type is required"),
-  skills: z.string(),
+  skills: z.string().optional(),
   description: z.string().min(1, "Description is required"),
   participantCount: z
     .number()
     .positive("Must be a positive number")
     .or(z.string().min(1, "Participant count is required")),
   duration: z.string().min(1, "Duration is required"),
-  organizerName: z.string().min(1, "Organizer name is required"),
-  organizerRole: z.string().min(1, "Organizer role is required"),
+  startDate: z.string().min(1, "Start date is required"),
+  responsibilities: z.string().min(1, "Responsibilities are required"),
+  location: z.string().min(1, "Location is required"),
 });
 
-export default function NewRecruit() {
+export default function NewJob() {
   const navigate = useNavigate();
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const initialValues = {
     title: "",
@@ -47,14 +59,26 @@ export default function NewRecruit() {
     description: "",
     participantCount: "",
     duration: "",
-    organizerName: "",
-    organizerRole: "",
+    startDate: new Date().toISOString().split("T")[0],
+    responsibilities: "",
+    location: "",
   };
 
-  const handleSubmit = (values, { setSubmitting }) => {
-    console.log("Form submitted:", values);
-    setSubmitting(false);
-    navigate("/");
+  const handleSubmit = async (values, { setSubmitting }) => {
+    try {
+      const response = await axios.post("/jobs/volunteer", values);
+      console.log("Form submitted successfully:", response.data);
+      setIsSuccessModalOpen(true);
+      setSubmitting(false);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setErrorMessage(
+        error.response?.data?.message ||
+          "An error occurred while submitting the form.",
+      );
+      setIsErrorModalOpen(true);
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -65,8 +89,8 @@ export default function NewRecruit() {
       className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 mt-2"
     >
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Recruit</h1>
-        <Button variant="outline" onClick={() => navigate("/recruit")}>
+        <h1 className="text-3xl font-bold">Volunteer</h1>
+        <Button variant="outline" onClick={() => navigate("/volunteer")}>
           Cancel
         </Button>
       </div>
@@ -79,9 +103,10 @@ export default function NewRecruit() {
           {({ errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
               <CardHeader>
-                <CardTitle>Opportunity Details</CardTitle>
+                <CardTitle>Volunteer Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Title Field */}
                 <div className="space-y-2">
                   <label htmlFor="title" className="text-sm font-medium">
                     Title
@@ -91,6 +116,7 @@ export default function NewRecruit() {
                     <div className="text-red-500">{errors.title}</div>
                   )}
                 </div>
+                {/* Type Field */}
                 <div className="space-y-2">
                   <label htmlFor="type" className="text-sm font-medium">
                     Type
@@ -125,6 +151,7 @@ export default function NewRecruit() {
                     <div className="text-red-500">{errors.type}</div>
                   )}
                 </div>
+                {/* Skills Field */}
                 <div className="space-y-2">
                   <label htmlFor="skills" className="text-sm font-medium">
                     Required Skills (comma-separated)
@@ -139,6 +166,7 @@ export default function NewRecruit() {
                     <div className="text-red-500">{errors.skills}</div>
                   )}
                 </div>
+                {/* Description Field */}
                 <div className="space-y-2">
                   <label htmlFor="description" className="text-sm font-medium">
                     Description
@@ -153,6 +181,7 @@ export default function NewRecruit() {
                     <div className="text-red-500">{errors.description}</div>
                   )}
                 </div>
+                {/* Participant Count and Duration Fields */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <label
@@ -188,28 +217,50 @@ export default function NewRecruit() {
                     )}
                   </div>
                 </div>
+                {/* Start Date Field */}
                 <div className="space-y-2">
-                  <label
-                    htmlFor="organizerName"
-                    className="text-sm font-medium"
-                  >
-                    Organizer Name
+                  <label htmlFor="startDate" className="text-sm font-medium">
+                    Start Date
                   </label>
-                  <Field as={Input} id="organizerName" name="organizerName" />
-                  {errors.organizerName && touched.organizerName && (
-                    <div className="text-red-500">{errors.organizerName}</div>
+                  <Field
+                    as={Input}
+                    id="startDate"
+                    name="startDate"
+                    type="date"
+                  />
+                  {errors.startDate && touched.startDate && (
+                    <div className="text-red-500">{errors.startDate}</div>
                   )}
                 </div>
+                {/* Location Field */}
+                <div className="space-y-2">
+                  <label htmlFor="location" className="text-sm font-medium">
+                    Location
+                  </label>
+                  <Field as={Input} id="location" name="location" />
+                  {errors.location && touched.location && (
+                    <div className="text-red-500">{errors.location}</div>
+                  )}
+                </div>
+                {/* Responsibilities Field */}
                 <div className="space-y-2">
                   <label
-                    htmlFor="organizerRole"
+                    htmlFor="responsibilities"
                     className="text-sm font-medium"
                   >
-                    Organizer Role
+                    Responsibilities (comma-separated)
                   </label>
-                  <Field as={Input} id="organizerRole" name="organizerRole" />
-                  {errors.organizerRole && touched.organizerRole && (
-                    <div className="text-red-500">{errors.organizerRole}</div>
+                  <Field
+                    as={Textarea}
+                    id="responsibilities"
+                    name="responsibilities"
+                    placeholder="e.g. Set up equipment, Coordinate volunteers"
+                    rows={3}
+                  />
+                  {errors.responsibilities && touched.responsibilities && (
+                    <div className="text-red-500">
+                      {errors.responsibilities}
+                    </div>
                   )}
                 </div>
               </CardContent>
@@ -226,6 +277,37 @@ export default function NewRecruit() {
           )}
         </Formik>
       </Card>
+
+      {/* Success Modal */}
+      <Dialog open={isSuccessModalOpen} onOpenChange={setIsSuccessModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Success</DialogTitle>
+            <DialogDescription>
+              Your volunteer opportunity has been successfully created.
+            </DialogDescription>
+          </DialogHeader>
+          <Button
+            onClick={() => {
+              setIsSuccessModalOpen(false);
+              navigate("/volunteer");
+            }}
+          >
+            OK
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Modal */}
+      <Dialog open={isErrorModalOpen} onOpenChange={setIsErrorModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Error</DialogTitle>
+            <DialogDescription>{errorMessage}</DialogDescription>
+          </DialogHeader>
+          <Button onClick={() => setIsErrorModalOpen(false)}>Close</Button>
+        </DialogContent>
+      </Dialog>
     </motion.main>
   );
 }

@@ -112,7 +112,13 @@ const NewsMain = () => {
       className={`flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-6 mt-2 transition-opacity duration-500 ${isVisible ? "opacity-100" : "opacity-0"}`}
     >
       <div className="flex items-center">
-        <h1 className="text-3xl font-bold">Explore Projects</h1>
+        <h1 className="text-3xl font-bold">
+          Explore{" "}
+          <b>
+            <u>Credible</u>
+          </b>{" "}
+          News
+        </h1>
       </div>
       <div className="flex flex-col gap-4 md:flex-row">
         <div className="flex-1">
