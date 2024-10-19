@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { axiosPrivate as axios } from "@/api/axios";
 import { motion, AnimatePresence } from "framer-motion";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,7 +33,14 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { Dialog, DialogOverlay, DialogContent } from "@/components/ui/dialog"; // Assuming you have a Dialog component in your UI
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const DonationMain = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,8 +50,10 @@ const DonationMain = () => {
   const [donationAmounts, setDonationAmounts] = useState({});
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
   const [itemsPerPage] = useState(6); // Display 6 items per page by default
-  const [openDialog, setOpenDialog] = useState(false); // Dialog state
+  const [dialogOpen, setDialogOpen] = useState(false); // Dialog state
   const [selectedOpportunityId, setSelectedOpportunityId] = useState(null); // For tracking the current opportunity
+  const { toast } = useToast(); // Initialize useToast for notifications
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -85,28 +96,55 @@ const DonationMain = () => {
   const handleDonationChange = (value, opportunityId) => {
     setDonationAmounts((prevState) => ({
       ...prevState,
-      [opportunityId]: value[0],
+      [opportunityId]: value[0], // Set the donation amount for the correct opportunity
     }));
   };
 
   // Open the payment confirmation dialog
   const handleDonate = (opportunityId) => {
-    setSelectedOpportunityId(opportunityId);
-    setOpenDialog(true); // Open the dialog
+    setSelectedOpportunityId(opportunityId); // Set the selected opportunity ID here
+    setDialogOpen(true); // Open the dialog
   };
 
-  // Handle payment confirmation
-  const handlePaymentConfirm = async (opportunityId) => {
-    const donationAmount = donationAmounts[opportunityId] || 10;
+  // Handle payment confirmation with success/error toasts
+  const handlePaymentConfirm = async () => {
+    const donationAmount = donationAmounts[selectedOpportunityId] || 10;
     try {
-      await axios.post("/job/donate", {
-        id: opportunityId,
+      // Make the donation request
+      const response = await axios.post("/jobs/donate", {
+        id: selectedOpportunityId,
         amount: donationAmount,
       });
-      setOpenDialog(false); // Close the dialog on success
-      console.log(`Donated $${donationAmount} to opportunity ${opportunityId}`);
+
+      // Extract the updated job from the response
+      const updatedJob = response.data.job;
+
+      // Close the dialog
+      setDialogOpen(false);
+
+      // Update the donation opportunities state with the updated job
+      setDonationOpportunities((prevOpportunities) =>
+        prevOpportunities.map((opportunity) =>
+          opportunity._id === updatedJob._id
+            ? { ...opportunity, currentAmount: updatedJob.currentAmount } // Update currentAmount
+            : opportunity,
+        ),
+      );
+
+      // Show a success toast
+      toast({
+        title: "Success",
+        description: `You have successfully donated $${donationAmount}.`,
+        status: "success",
+      });
     } catch (error) {
-      console.error("Donation failed:", error);
+      setDialogOpen(false);
+      // Show an error toast
+      toast({
+        title: "Error",
+        description: "Failed to process the donation. Please try again.",
+        status: "error",
+      });
     }
   };
 
@@ -192,13 +230,13 @@ const DonationMain = () => {
           >
             {currentOpportunities.map((opportunity) => (
               <motion.div
-                key={opportunity.id}
+                key={opportunity._id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                <Card key={opportunity.id} className="flex flex-col h-full">
+                <Card key={opportunity._id} className="flex flex-col h-full">
                   <CardHeader className="pb-0 pb-3">
                     <div className="flex justify-between items-center mb-2">
                       <Badge
@@ -244,7 +282,7 @@ const DonationMain = () => {
                           Donation Amount
                         </span>
                         <span className="text-sm font-medium">
-                          ${donationAmounts[opportunity.id] || 10}
+                          ${donationAmounts[opportunity._id] || 10}
                         </span>
                       </div>
                       <Slider
@@ -252,19 +290,42 @@ const DonationMain = () => {
                         max={1000}
                         step={5}
                         onValueChange={(value) =>
-                          handleDonationChange(value, opportunity.id)
+                          handleDonationChange(value, opportunity._id)
                         }
                       />
                     </div>
                   </CardContent>
                   <CardFooter className="flex justify-between items-center">
-                    <Button
-                      className="flex-grow"
-                      onClick={() => handleDonate(opportunity.id)}
-                    >
-                      <Heart className="mr-2 h-4 w-4" />
-                      Donate ${donationAmounts[opportunity.id] || 10}
-                    </Button>
+                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button
+                          className="flex-grow"
+                          onClick={() => handleDonate(opportunity._id)}
+                        >
+                          <Heart className="mr-2 h-4 w-4" />
+                          Donate ${donationAmounts[opportunity._id] || 10}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogTitle>Confirm Donation</DialogTitle>
+                        <DialogDescription>
+                          Are you sure you want to donate $
+                          {donationAmounts[selectedOpportunityId] || 10} to this
+                          fundraiser?
+                        </DialogDescription>
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => setDialogOpen(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button onClick={handlePaymentConfirm}>
+                            Confirm Donation
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </CardFooter>
                 </Card>
               </motion.div>
@@ -297,28 +358,7 @@ const DonationMain = () => {
           </Button>
         </div>
       )}
-
-      {/* Payment Confirmation Dialog */}
-      {openDialog && (
-        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-          <DialogOverlay />
-          <DialogContent className="bg-white rounded-lg shadow-lg p-6">
-            <h3 className="text-lg font-semibold mb-2">Confirm Payment</h3>
-            <p className="text-gray-700 mb-4">
-              You are about to donate $
-              {donationAmounts[selectedOpportunityId] || 10}.
-            </p>
-            <div className="flex justify-between items-center mt-4">
-              <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-              <Button
-                onClick={() => handlePaymentConfirm(selectedOpportunityId)}
-              >
-                Confirm Payment
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+      <Toaster />
     </motion.main>
   );
 };

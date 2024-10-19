@@ -224,17 +224,17 @@ const leaveVolunteer = asyncHandler(async (req, res) => {
 
 // Donate to a specific fundraiser
 const donate = asyncHandler(async (req, res) => {
-  const { _id, amount } = req.body;
+  const { id, amount } = req.body;
 
   // fetch user ID from Clerk
   const userId = req.auth.userId;
 
   // find the job by ID
-  const job = await Jobs.findOne({ _id });
+  const job = await Jobs.findOne({ _id: id });
 
   // validate job existence
   if (!job) {
-    return res.status(404).json({ message: `No job with ID: ${_id} found` });
+    return res.status(404).json({ message: `No job with ID: ${id} found` });
   }
 
   // validate job category

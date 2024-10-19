@@ -22,7 +22,7 @@ module.exports = model(
     },
     participantCount: Number,
     joinedUsers: {
-      type: [{ type: String }], // Array of user IDs
+      type: [], // Array of user IDs
       default: [],
     },
     skills: [String], // List of skills
